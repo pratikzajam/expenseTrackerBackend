@@ -99,7 +99,7 @@ export const Login = async (req, res) => {
     
    if(isPasswordMatch)
    {
-    return res.status(400).json({
+    return res.status(201).json({
       status: true,
       message: "Logged in sucessfully",
       data: null,
