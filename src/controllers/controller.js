@@ -144,33 +144,33 @@ export const sendOtp = async (email) => {
 });
 
 
-    async function main() {
-      try {
-        let otp = randomInteger(1000, 9999);
-        console.log(`🔢 Generated OTP: ${otp} for email: ${email}`);
-    
-        const mailOptions = {
-          from: '"Pratik Zajam" <your-email@gmail.com>',
-          to: email,
-          subject: "🔐 OTP Verification - Secure Your Account",
-          text: `Your One-Time Password (OTP) for verification is: ${otp}`,
-          html: `<div>OTP: <strong>${otp}</strong></div>`,
-        };
-    
-        // Send Email
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`✅ Email sent successfully! Message ID: ${info.messageId}`);
-    
-        let OtpData = await Otp.create({ email: email, Otp: otp });
-        console.log(`✅ OTP saved in database for ${email}: ${OtpData.Otp}`);
-    
-      } catch (error) {
-        console.error("❌ Error in main():", error);
-      }
-    }
-    
-    // Call main with proper error handling
-    main().catch((err) => console.error("❌ Unhandled error in main():", err));
+async function main() {
+  try {
+    let otp = randomInteger(1000, 9999);
+    console.log(`🔢 Generated OTP: ${otp} for email: ${email}`);
+
+    const mailOptions = {
+      from: '"Pratik Zajam" zajampratik@gmail.com',
+      to: email,
+      subject: "🔐 OTP Verification - Secure Your Account",
+      text: `Your One-Time Password (OTP) for verification is: ${otp}`,
+      html: `<div>OTP: <strong>${otp}</strong></div>`,
+    };
+
+    // Send Email
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Email sent successfully! Message ID: ${info.messageId}`);
+
+    let OtpData = await Otp.create({ email: email, Otp: otp });
+    console.log(`✅ OTP saved in database for ${email}: ${OtpData.Otp}`);
+
+  } catch (error) {
+    console.error("❌ Error in main():", error);
+  }
+}
+
+// Call main with proper error handling
+main().catch((err) => console.error("❌ Unhandled error in main():", err));
   } catch (error) {
     console.error(" Fatal Error in sendOtp:", error);
 
