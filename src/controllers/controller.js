@@ -136,7 +136,7 @@ export const sendOtp = async (email) => {
   secure: false, // STARTTLS (explicit TLS)
   auth: {
     user: "zajampratik@gmail.com",
-    pass: "your-app-password",
+    pass: "aubtysoqveyqrlkd",
   },
   tls: {
     rejectUnauthorized: false, // Ignore self-signed certificate errors
