@@ -4,6 +4,7 @@ import Transaction from '../models/transactionModel.js'
 import nodemailer from 'nodemailer'
 import randomInteger from 'random-int';
 import bcrypt from "bcrypt";
+import moment from "moment";
 
 export const Register = async (req, res) => {
   try {
@@ -100,7 +101,7 @@ export const Login = async (req, res) => {
         status: true,
         message: "Logged in sucessfully",
         data: {
-         userId:UserData._id
+          userId: UserData._id
 
         },
       });
@@ -130,47 +131,47 @@ export const sendOtp = async (email) => {
   try {
     console.log(`📧 Attempting to send OTP to: ${email}`);
 
-  const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,  // Use 587 instead of 465
-  secure: false, // STARTTLS (explicit TLS)
-  auth: {
-    user: "zajampratik@gmail.com",
-    pass: "aubtysoqveyqrlkd",
-  },
-  tls: {
-    rejectUnauthorized: false, // Ignore self-signed certificate errors
-  },
-});
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,  // Use 587 instead of 465
+      secure: false, // STARTTLS (explicit TLS)
+      auth: {
+        user: "zajampratik@gmail.com",
+        pass: "aubtysoqveyqrlkd",
+      },
+      tls: {
+        rejectUnauthorized: false, // Ignore self-signed certificate errors
+      },
+    });
 
 
-async function main() {
-  try {
-    let otp = randomInteger(1000, 9999);
-    console.log(`🔢 Generated OTP: ${otp} for email: ${email}`);
+    async function main() {
+      try {
+        let otp = randomInteger(1000, 9999);
+        console.log(`🔢 Generated OTP: ${otp} for email: ${email}`);
 
-    const mailOptions = {
-      from: '"Pratik Zajam" zajampratik@gmail.com',
-      to: email,
-      subject: "🔐 OTP Verification - Secure Your Account",
-      text: `Your One-Time Password (OTP) for verification is: ${otp}`,
-      html: `<div>OTP: <strong>${otp}</strong></div>`,
-    };
+        const mailOptions = {
+          from: '"Pratik Zajam" zajampratik@gmail.com',
+          to: email,
+          subject: "🔐 OTP Verification - Secure Your Account",
+          text: `Your One-Time Password (OTP) for verification is: ${otp}`,
+          html: `<div>OTP: <strong>${otp}</strong></div>`,
+        };
 
-    // Send Email
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`✅ Email sent successfully! Message ID: ${info.messageId}`);
+        // Send Email
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`✅ Email sent successfully! Message ID: ${info.messageId}`);
 
-    let OtpData = await Otp.create({ email: email, Otp: otp });
-    console.log(`✅ OTP saved in database for ${email}: ${OtpData.Otp}`);
+        let OtpData = await Otp.create({ email: email, Otp: otp });
+        console.log(`✅ OTP saved in database for ${email}: ${OtpData.Otp}`);
 
-  } catch (error) {
-    console.error("❌ Error in main():", error);
-  }
-}
+      } catch (error) {
+        console.error("❌ Error in main():", error);
+      }
+    }
 
-// Call main with proper error handling
-main().catch((err) => console.error("❌ Unhandled error in main():", err));
+    // Call main with proper error handling
+    main().catch((err) => console.error("❌ Unhandled error in main():", err));
   } catch (error) {
     console.error(" Fatal Error in sendOtp:", error);
 
@@ -262,7 +263,7 @@ export const addTransaction = async (req, res) => {
       });
     }
 
-   
+
 
     const dateObject = new Date(date);
 
@@ -372,11 +373,126 @@ export const deleteTransaction = async (req, res) => {
 };
 
 
+export const getTransactionByUserid = async (req, res) => {
+
+  const { userId } = req.body;
+
+  try {
+    if (!userId) {
+      return res.status(400).json({
+        status: false,
+        message: "user id not found",
+        data: null,
+      });
+
+    }
+
+    let TransactionData = await Transaction.find({ userId: userId }).lean();
+
+    if (TransactionData.length == 0) {
+
+      return res.status(400).json({
+        status: false,
+        message: "No Data Found",
+        data: null,
+      });
+    }
+
+    TransactionData = TransactionData.map((transaction) => {
+      return {
+        ...transaction,
+        date: new Date(transaction.date).toISOString().split("T")[0],
+      };
+    });
+
+    return res.status(201).json({
+      status: false,
+      message: "Data fetched sucessfully",
+      data: TransactionData,
+    });
+
+  } catch (error) {
+
+
+    return res.status(400).json({
+      status: false,
+      message: error.message,
+      data: null,
+    });
+
+  }
+
+
+
+
+
+
+
+
+
+};
+
+
+export const getStatisticsByid = async (req, res) => {
+
+  const { userId } = req.body;
+
+  try {
+
+    if (!userId) {
+      return res.status(400).json({
+        status: false,
+        message: "user id not found",
+        data: null,
+      });
+
+    }
+
+    const startOfMonth = moment().startOf("month").toDate();
+    const endOfMonth = moment().endOf("month").toDate();
+
+    let IncomeData = await Transaction.find({
+      userId: userId, type: "income", date: { $gte: startOfMonth, $lt: endOfMonth }
+    }).lean();
+
+    let ExpenseData = await Transaction.find({
+      userId: userId, type: "expense", date: { $gte: startOfMonth, $lt: endOfMonth }
+    }).lean();
+
+    const TotalIncome = IncomeData.reduce((acc, transaction) => acc + transaction.amount, 0);
+    const TotalExpense = ExpenseData.reduce((acc, transaction) => acc + transaction.amount, 0);
+    let TotalSavings = TotalIncome - TotalExpense
+
+    if (TotalSavings < 0) {
+      TotalSavings = 0;
+    }
+
+    let statData = {
+      totalIncome: TotalIncome,
+      totalExpense: TotalExpense,
+      totalSavings: TotalSavings
+    }
+
+    return res.status(201).json({
+      status: false,
+      message: "Data fetched sucessfully",
+      data: statData,
+    });
+
+  } catch (error) {
+    console.log(error)
+  }
+
+
+};
+
+
+
 
 export const updateTransaction = async (req, res) => {
   try {
 
-    const { transactionId,type,amount,date,description,category} = req.body
+    const { transactionId, type, amount, date, description, category } = req.body
 
     if (!transactionId) {
       return res.status(400).json({
@@ -387,21 +503,21 @@ export const updateTransaction = async (req, res) => {
     }
 
     const updatedUser = await Transaction.findOneAndUpdate(
-      { _id: transactionId },  
-      { 
+      { _id: transactionId },
+      {
         $set: {
-          type:type,
-          amount:amount,
-          date:date,
-          description:description,
-          category:category
+          type: type,
+          amount: amount,
+          date: date,
+          description: description,
+          category: category
         }
       },
       { new: true, runValidators: true }
     );
 
     console.log(updatedUser)
-    
+
 
     if (updatedUser) {
 

@@ -10,7 +10,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173", 
-  "https://your-frontend-deployed.vercel.app"
+  "https://expense-tracker-backend-rosy-iota.vercel.app"
 ];
 
 app.use(cors({
@@ -23,7 +23,7 @@ app.use(cors({
 
 app.options('*', cors());
 
-const PORT = process.env.PORT || 3000;
+const PORT =  process.env.PORT || 4000;
 
 app.get("/", (req, res) => {
   res.send("Hello, world!");
