@@ -130,53 +130,47 @@ export const sendOtp = async (email) => {
   try {
     console.log(`📧 Attempting to send OTP to: ${email}`);
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "zajampratik@gmail.com",
-        pass: "razyjjiwqwxxkvsi",
-      },
-    });
+  const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,  // Use 587 instead of 465
+  secure: false, // STARTTLS (explicit TLS)
+  auth: {
+    user: "zajampratik@gmail.com",
+    pass: "your-app-password",
+  },
+  tls: {
+    rejectUnauthorized: false, // Ignore self-signed certificate errors
+  },
+});
+
 
     async function main() {
-      let otp = randomInteger(1000, 9999); // Ensuring OTP is a 4-digit number
-      console.log(`🔢 Generated OTP: ${otp} for email: ${email}`);
-
-      const mailOptions = {
-        from: '"Pratik Zajam" <your-email@gmail.com>',
-        to: email,
-        subject: "🔐 OTP Verification - Secure Your Account",
-        text: `Your One-Time Password (OTP) for verification is: ${otp}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 5px; max-width: 500px;">
-            <h2 style="color: #333;">🔐 OTP Verification</h2>
-            <p>Your One-Time Password (OTP) for verification is:</p>
-            <h1 style="color: #007bff; text-align: center;">${otp}</h1>
-            <p>This OTP is valid for the next <strong>10 minutes</strong>. Do not share this code with anyone.</p>
-            <hr style="border: 0.5px solid #ddd;">
-            <p style="font-size: 14px; color: #666;">If you didn’t request this, please ignore this email.</p>
-            <p>Thank you,</p>
-            <p><strong>Expense Tracker</strong></p>
-          </div>
-        `,
-      };
-
-      // Send Email
-      const info = await transporter.sendMail(mailOptions);
-      console.log(`✅ Email sent successfully! Message ID: ${info.messageId}`);
-
-      let OtpData = await Otp.create({
-        email: email,
-        Otp: otp,
-      });
-
-      console.log(`✅ OTP saved in database for ${email}: ${OtpData.Otp}`);
+      try {
+        let otp = randomInteger(1000, 9999);
+        console.log(`🔢 Generated OTP: ${otp} for email: ${email}`);
+    
+        const mailOptions = {
+          from: '"Pratik Zajam" <your-email@gmail.com>',
+          to: email,
+          subject: "🔐 OTP Verification - Secure Your Account",
+          text: `Your One-Time Password (OTP) for verification is: ${otp}`,
+          html: `<div>OTP: <strong>${otp}</strong></div>`,
+        };
+    
+        // Send Email
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`✅ Email sent successfully! Message ID: ${info.messageId}`);
+    
+        let OtpData = await Otp.create({ email: email, Otp: otp });
+        console.log(`✅ OTP saved in database for ${email}: ${OtpData.Otp}`);
+    
+      } catch (error) {
+        console.error("❌ Error in main():", error);
+      }
     }
-
-    main().catch((err) => {
-      console.error(" Error sending OTP:", err);
-    });
-
+    
+    // Call main with proper error handling
+    main().catch((err) => console.error("❌ Unhandled error in main():", err));
   } catch (error) {
     console.error(" Fatal Error in sendOtp:", error);
 
