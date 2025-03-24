@@ -9,8 +9,9 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
-  "https://expense-tracker-plum-omega-26.vercel.app/", 
-  "https://expense-tracker-backend-rosy-iota.vercel.app"
+  "http://localhost:5173/", 
+  "https://expense-tracker-backend-rosy-iota.vercel.app",
+  "https://expense-tracker-plum-omega-26.vercel.app/"
 ];
 
 app.use(cors({
