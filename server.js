@@ -9,7 +9,7 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
-  "http://localhost:5173", 
+  "https://expense-tracker-plum-omega-26.vercel.app/", 
   "https://expense-tracker-backend-rosy-iota.vercel.app"
 ];
 
@@ -38,5 +38,5 @@ connectDB();
 
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);  
 });
