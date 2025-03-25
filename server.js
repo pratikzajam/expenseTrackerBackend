@@ -10,27 +10,29 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:5174",  // ✅ Add frontend localhost
   "https://expense-tracker-plum-omega-26.vercel.app",
   "https://expense-tracker-backend-rosy-iota.vercel.app"
 ];
 
-// ✅ Apply CORS Middleware Before Routes
+// ✅ Apply CORS Middleware
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: "GET, POST, PUT, DELETE, OPTIONS",
-  allowedHeaders: "Content-Type, Authorization",
-  credentials: true, 
+  origin: allowedOrigins,  // Allow multiple origins
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow all HTTP methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Allow required headers
+  credentials: true, // Allow cookies & authentication headers
 }));
 
-// ✅ Allow Preflight Requests (Important)
-app.options("*", cors());
+// ✅ Handle Preflight Requests (OPTIONS)
+app.options("*", (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.status(200).end();
+});
 
+// ✅ Middleware
 app.use(express.json());
 
 // ✅ Define Routes AFTER CORS Middleware
