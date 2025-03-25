@@ -551,6 +551,51 @@ export const updateTransaction = async (req, res) => {
 
 
 
+export const getuserDeatilsByid = async (req, res) => {
+  try {
+
+    const { userId } = req.body
+
+    if (!userId) {
+      return res.status(400).json({
+        status: false,
+        message: "All fields are required",
+        data: null,
+      });
+    }
+
+    let getUserDetails = await User.findById(userId);
+
+    if (!getUserDetails) {
+      return res.status(400).json({
+        status: false,
+        message: "User Not Found",
+        data: null,
+      });
+    }
+
+    let userEmail = getUserDetails.email;
+
+
+    return res.status(400).json({
+      status: false,
+      message: "data fetched sucessfully",
+      data: {
+        email: userEmail
+      }
+    });
+
+
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: error.message || "Fatal error. Please contact the admin.",
+      data: null,
+    });
+  }
+};
+
+
 
 
 
