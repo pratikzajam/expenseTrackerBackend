@@ -8,9 +8,9 @@ import moment from "moment";
 
 export const Register = async (req, res) => {
   try {
-    let { email, password } = req.body;
+    let { name,email, password } = req.body;
 
-    if (!email || !password) {
+    if (!name||!email || !password) {
       console.error("Validation Error: All fields are required.");
       return res.status(400).json({
         status: "error",
@@ -30,6 +30,7 @@ export const Register = async (req, res) => {
     }
 
     let userData = await User.create({
+      name:name,
       email: email,
       password: password,
       isVerified: false
