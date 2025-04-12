@@ -1,4 +1,3 @@
-// server.js or index.js
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -9,27 +8,51 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Allow all origins dynamically
+// ✅ List of allowed origins (local + Vercel frontend)
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://expense-tracker-plum-omega-26.vercel.app"
+];
+
+// ✅ CORS middleware configuration
 app.use(cors({
-  origin: true, // Reflects the request origin automatically
+  origin: function (origin, callback) {
+    // Allow requests with no origin (e.g., mobile apps, curl, or Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("CORS policy: Not allowed by CORS"));
+    }
+  },
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true, // Support cookies & authentication
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// ✅ Automatically handle preflight OPTIONS requests
-app.options("*", cors());
+// ✅ Preflight requests handler
+app.options("*", cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 
-// ✅ Middleware to parse JSON
+// ✅ JSON body parser
 app.use(express.json());
 
-// ✅ Connect to Database
+// ✅ Connect to MongoDB
 connectDB();
 
-// ✅ Define Routes AFTER middleware
+// ✅ Routes
 app.use('/', routes);
 
-// ✅ Start Server
+// ✅ Start server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
