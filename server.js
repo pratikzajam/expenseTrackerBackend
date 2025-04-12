@@ -1,3 +1,4 @@
+// server.js or index.js
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -8,38 +9,27 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",  // ✅ Add frontend localhost
-  "https://expense-tracker-plum-omega-26.vercel.app",
-  "https://expense-tracker-backend-rosy-iota.vercel.app"
-];
-
-// ✅ Apply CORS Middleware
+// ✅ Allow all origins dynamically
 app.use(cors({
-  origin: allowedOrigins,  // Allow multiple origins
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow all HTTP methods
-  allowedHeaders: ["Content-Type", "Authorization"], // Allow required headers
-  credentials: true, // Allow cookies & authentication headers
+  origin: true, // Reflects the request origin automatically
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true, // Support cookies & authentication
 }));
 
-// ✅ Handle Preflight Requests (OPTIONS)
-app.options("*", (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.status(200).end();
-});
+// ✅ Automatically handle preflight OPTIONS requests
+app.options("*", cors());
 
-// ✅ Middleware
+// ✅ Middleware to parse JSON
 app.use(express.json());
 
-// ✅ Define Routes AFTER CORS Middleware
-app.use('/', routes);
-
+// ✅ Connect to Database
 connectDB();
 
+// ✅ Define Routes AFTER middleware
+app.use('/', routes);
+
+// ✅ Start Server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

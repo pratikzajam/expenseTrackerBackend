@@ -89,7 +89,7 @@ export const Login = async (req, res) => {
     }
 
 
-    console.log(UserData)
+ 
 
     let storedPassword = UserData.password
 
