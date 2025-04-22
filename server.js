@@ -43,6 +43,21 @@ app.options("*", cors({
   credentials: true
 }));
 
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin); // allow dynamic origin
+  res.header("Access-Control-Allow-Credentials", true);
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204); // OPTIONS request successful
+  }
+
+  next();
+});
+
+
 // ✅ JSON body parser
 app.use(express.json());
 
